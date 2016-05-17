@@ -13,12 +13,13 @@ public class Player extends Sprite implements Commons{
     private final int START_Y = 280; 
     private final int START_X = 270;
 
-    private final String player = "/Recursos/player.png";
+    private String player;
+    private boolean localplayer;
     private int width;
 
-    public Player() {
+    public Player(String p) {
 
-               
+        player = p;
         ImageIcon ii = new ImageIcon(this.getClass().getResource(player));    
         Image image = ii.getImage();
         Image newimg = image.getScaledInstance(PLAYER_HEIGHT, PLAYER_WIDTH,  java.awt.Image.SCALE_SMOOTH);

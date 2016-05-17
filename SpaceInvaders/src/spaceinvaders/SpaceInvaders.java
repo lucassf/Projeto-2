@@ -1,15 +1,15 @@
 package spaceinvaders;
 
 import Util.Commons;
-import javax.swing.JFrame;
+import javax.swing.*;
 
 public class SpaceInvaders extends JFrame implements Commons {
 
-    public SpaceInvaders()
-    {
-        add(new Board());
+    public SpaceInvaders(int i)
+    {       
+        add(new Board(i));
         setTitle("Space Invaders");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setSize(BOARD_WIDTH, BOARD_HEIGTH);
         setLocationRelativeTo(null);
         setVisible(true);
@@ -17,6 +17,8 @@ public class SpaceInvaders extends JFrame implements Commons {
     }
 
     public static void main(String[] args) {
-        new SpaceInvaders();
+        Menu calc = new Menu();
+        calc.setVisible(true);
+   //     new SpaceInvaders();
     }
 }

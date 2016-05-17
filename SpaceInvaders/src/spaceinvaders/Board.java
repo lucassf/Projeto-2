@@ -28,39 +28,39 @@ public class Board extends JPanel implements Runnable, Commons {
 
     private Dimension d;
     private ArrayList aliens;
-    private Player player;
+    private Player player1, player2;
     private Shot shot;
-
+    private int nplayers;
     private int alienX = 150;
     private int alienY = 5;
     private int direction = -1;
     private int deaths = 0;
 
-    private boolean ingame = true;
+    private boolean ingame1 = true, ingame2 = false; //player1 e player2
     private final String expl = "/Recursos/explosion.png";
     private final String alienpix = "/Recursos/alien.png";
     private String message = "Game Over";
 
     private Thread animator;
 
-    public Board() 
+    public Board(int n) 
     {
-
+        nplayers = n;
         addKeyListener(new TAdapter());
         setFocusable(true);
         d = new Dimension(BOARD_WIDTH, BOARD_HEIGTH);
         setBackground(Color.black);
 
-        gameInit();
+        gameInit(nplayers);
         setDoubleBuffered(true);
     }
 
     public void addNotify() {
         super.addNotify();
-        gameInit();
+        gameInit(nplayers);
     }
 
-    public void gameInit() {
+    public void gameInit(int n) {
 
         aliens = new ArrayList();
 
@@ -76,10 +76,15 @@ public class Board extends JPanel implements Runnable, Commons {
             }
         }
 
-        player = new Player();
+        player1 = new Player("/Recursos/player.png");
+        player2 = null;
+        if (nplayers == 2){
+            player2 = new Player("/Recursos/player2.png");
+            ingame2 = true;
+        }
         shot = new Shot();
 
-        if (animator == null || !ingame) {
+        if (animator == null || (!ingame1 && !ingame2)) {
             animator = new Thread(this);
             animator.start();
         }
@@ -102,15 +107,21 @@ public class Board extends JPanel implements Runnable, Commons {
         }
     }
 
-    public void drawPlayer(Graphics g) {
+    public void drawPlayers(Graphics g) {
 
-        if (player.isVisible()) {
-            g.drawImage(player.getImage(), player.getX(), player.getY(), this);
+        if (player1.isVisible()) {
+            g.drawImage(player1.getImage(), player1.getX(), player1.getY(), this);
         }
-
-        if (player.isDying()) {
-            player.die();
-            ingame = false;
+        if (nplayers == 2 && player2.isVisible()){
+            g.drawImage(player2.getImage(), player2.getX(), player2.getY(), this);
+        }
+        if (player1.isDying()) {
+            player1.die();
+            ingame1 = false;
+        }
+        if (nplayers == 2 && player2.isDying()){
+            player2.die();
+            ingame2 = false;
         }
     }
 
@@ -142,11 +153,11 @@ public class Board extends JPanel implements Runnable, Commons {
       g.fillRect(0, 0, d.width, d.height);
       g.setColor(Color.green);   
 
-      if (ingame) {
+      if (ingame1 || ingame2) {
 
         g.drawLine(0, GROUND, BOARD_WIDTH, GROUND);
         drawAliens(g);
-        drawPlayer(g);
+        drawPlayers(g);
         drawShot(g);
         drawBombing(g);
       }
@@ -180,13 +191,14 @@ public class Board extends JPanel implements Runnable, Commons {
     public void animationCycle()  {
 
         if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {
-            ingame = false;
+            ingame1 = false;
+            ingame2 = false;
             message = "Game won!";
         }
 
         // player
 
-        player.act();
+        player1.act();
 
         // shot
         if (shot.isVisible()) {
@@ -228,7 +240,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
          Iterator it1 = aliens.iterator();
 
-         while (it1.hasNext()) {
+        while (it1.hasNext()) {
              Alien a1 = (Alien) it1.next();
              int x = a1.getX();
 
@@ -262,7 +274,8 @@ public class Board extends JPanel implements Runnable, Commons {
                 int y = alien.getY();
 
                 if (y > GROUND - ALIEN_HEIGHT) {
-                    ingame = false;
+                    ingame1 = false;
+                    ingame2 = false;
                     message = "Invasion!";
                 }
 
@@ -288,21 +301,21 @@ public class Board extends JPanel implements Runnable, Commons {
 
             int bombX = b.getX();
             int bombY = b.getY();
-            int playerX = player.getX();
-            int playerY = player.getY();
+            int player1X = player1.getX();
+            int player1Y = player1.getY();
 
-            if (player.isVisible() && !b.isDestroyed()) {
-                if ( bombX >= (playerX) && 
-                    bombX <= (playerX+PLAYER_WIDTH) &&
-                    bombY >= (playerY) && 
-                    bombY <= (playerY+PLAYER_HEIGHT) ) {
+            if (player1.isVisible() && !b.isDestroyed()) {
+                if ( bombX >= (player1X) && 
+                    bombX <= (player1X+PLAYER_WIDTH) &&
+                    bombY >= (player1Y) && 
+                    bombY <= (player1Y+PLAYER_HEIGHT) ) {
                         ImageIcon ii = 
                             new ImageIcon(this.getClass().getResource(expl));
                         Image image = ii.getImage();
                         Image newimg = image.getScaledInstance(PLAYER_HEIGHT, PLAYER_WIDTH,  java.awt.Image.SCALE_SMOOTH);
                         ii = new ImageIcon(newimg);
-                        player.setImage(ii.getImage());
-                        player.setDying(true);
+                        player1.setImage(ii.getImage());
+                        player1.setDying(true);
                         b.setDestroyed(true);;
                     }
             }
@@ -322,7 +335,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
         beforeTime = System.currentTimeMillis();
 
-        while (ingame) {
+        while (ingame1 || ingame2 ) {
             repaint();
             animationCycle();
 
@@ -344,17 +357,17 @@ public class Board extends JPanel implements Runnable, Commons {
     private class TAdapter extends KeyAdapter {
 
         public void keyReleased(KeyEvent e) {
-            player.keyReleased(e);
+            player1.keyReleased(e);
         }
 
         public void keyPressed(KeyEvent e) {
 
-          player.keyPressed(e);
+          player1.keyPressed(e);
 
-          int x = player.getX();
-          int y = player.getY();
+          int x = player1.getX();
+          int y = player1.getY();
 
-          if (ingame)
+          if (ingame1)
           {
             if (e.getKeyCode()== KeyEvent.VK_S) {
                 if (!shot.isVisible())
