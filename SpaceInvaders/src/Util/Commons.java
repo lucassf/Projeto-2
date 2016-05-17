@@ -1,10 +1,13 @@
 package Util;
 
 public interface Commons {
-    public static final int BOARD_WIDTH = 358;
-    public static final int BOARD_HEIGTH = 350;
+    public static final int BOARD_WIDTH = 358;//358
+    public static final int BOARD_HEIGTH = 350;//350
     public static final int GROUND = 290;
     public static final int BOMB_HEIGHT = 5;
+    public static final int BOMB_WIDTH = 5;
+    public static final int EXPLOSION_HEIGHT = 70;
+    public static final int EXPLOSION_WIDTH = 70;
     public static final int ALIEN_HEIGHT = 12;
     public static final int ALIEN_WIDTH = 12;
     public static final int BORDER_RIGHT = 30;

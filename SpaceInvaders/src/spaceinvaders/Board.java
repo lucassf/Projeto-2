@@ -4,11 +4,14 @@ import Util.Commons;
 import Player.Player;
 import Player.Shot;
 import Enemies.Alien;
+import static Util.Commons.ALIEN_HEIGHT;
+import static Util.Commons.ALIEN_WIDTH;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -34,8 +37,8 @@ public class Board extends JPanel implements Runnable, Commons {
     private int deaths = 0;
 
     private boolean ingame = true;
-    private final String expl = "../spacepix/explosion.png";
-    private final String alienpix = "../spacepix/alien.png";
+    private final String expl = "/Recursos/explosion.png";
+    private final String alienpix = "/Recursos/alien.png";
     private String message = "Game Over";
 
     private Thread animator;
@@ -62,7 +65,9 @@ public class Board extends JPanel implements Runnable, Commons {
         aliens = new ArrayList();
 
         ImageIcon ii = new ImageIcon(this.getClass().getResource(alienpix));
-
+        Image image = ii.getImage();
+        Image newimg = image.getScaledInstance(ALIEN_HEIGHT, ALIEN_WIDTH,  java.awt.Image.SCALE_SMOOTH);
+        ii = new ImageIcon(newimg);
         for (int i=0; i < 4; i++) {
             for (int j=0; j < 6; j++) {
                 Alien alien = new Alien(alienX + 18*j, alienY + 18*i);
@@ -201,6 +206,9 @@ public class Board extends JPanel implements Runnable, Commons {
                         shotY <= (alienY+ALIEN_HEIGHT) ) {
                             ImageIcon ii = 
                                 new ImageIcon(getClass().getResource(expl));
+                            Image image = ii.getImage();
+                            Image newimg = image.getScaledInstance(EXPLOSION_HEIGHT, EXPLOSION_WIDTH,  java.awt.Image.SCALE_SMOOTH);
+                            ii = new ImageIcon(newimg);
                             alien.setImage(ii.getImage());
                             alien.setDying(true);
                             deaths++;
@@ -290,6 +298,9 @@ public class Board extends JPanel implements Runnable, Commons {
                     bombY <= (playerY+PLAYER_HEIGHT) ) {
                         ImageIcon ii = 
                             new ImageIcon(this.getClass().getResource(expl));
+                        Image image = ii.getImage();
+                        Image newimg = image.getScaledInstance(PLAYER_HEIGHT, PLAYER_WIDTH,  java.awt.Image.SCALE_SMOOTH);
+                        ii = new ImageIcon(newimg);
                         player.setImage(ii.getImage());
                         player.setDying(true);
                         b.setDestroyed(true);;
@@ -345,7 +356,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
           if (ingame)
           {
-            if (e.isAltDown()) {
+            if (e.getKeyCode()== KeyEvent.VK_S) {
                 if (!shot.isVisible())
                     shot = new Shot(x, y);
             }
