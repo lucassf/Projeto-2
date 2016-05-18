@@ -215,7 +215,7 @@ public class Board extends JPanel implements Runnable, Commons {
                 BOARD_WIDTH / 2);
     }
 
-    public void animationCycle() {
+    public void animationCycle() throws IOException {
 
         if (deaths == NUMBER_OF_ALIENS_TO_DESTROY) {
             ingame1 = false;
@@ -286,10 +286,23 @@ public class Board extends JPanel implements Runnable, Commons {
 
         // bombs
         Iterator i3 = aliens.iterator();
+        int[] vars = null;
+        if (nplayers > 1) {
+            output.println("ALIENS " + (NUMBER_OF_ALIENS_TO_DESTROY - deaths));
+            output.flush();
+            String[] separator = input.readLine().split(" ");
+            vars = new int[separator.length];
+            for (int i = 0; i < vars.length; i++) {
+                vars[i] = Integer.parseInt(separator[i]);
+            }
+        }
         Random generator = new Random();
 
+        int j = 0;
+
         while (i3.hasNext()) {
-            int shot = generator.nextInt(15);
+            int shot = nplayers > 1 ? vars[j] : generator.nextInt(15);
+            j = (j+1)%vars.length;
             Alien a = (Alien) i3.next();
             Alien.Bomb b = a.getBomb();
             if (shot == CHANCE && a.isVisible() && b.isDestroyed()) {
@@ -299,25 +312,9 @@ public class Board extends JPanel implements Runnable, Commons {
                 b.setY(a.getY());
             }
 
-            int bombX = b.getX();
-            int bombY = b.getY();
-            int player1X = player1.getX();
-            int player1Y = player1.getY();
-
-            if (player1.isVisible() && !b.isDestroyed()) {
-                if (bombX >= (player1X)
-                        && bombX <= (player1X + PLAYER_WIDTH)
-                        && bombY >= (player1Y)
-                        && bombY <= (player1Y + PLAYER_HEIGHT)) {
-                    ImageIcon ii
-                            = new ImageIcon(this.getClass().getResource(expl));
-                    Image image = ii.getImage();
-                    Image newimg = image.getScaledInstance(PLAYER_HEIGHT, PLAYER_WIDTH, java.awt.Image.SCALE_SMOOTH);
-                    ii = new ImageIcon(newimg);
-                    player1.setImage(ii.getImage());
-                    player1.setDying(true);
-                    b.setDestroyed(true);;
-                }
+            b.checkColision(player1, expl);
+            if (nplayers > 1) {
+                b.checkColision(player2, expl);
             }
 
             if (!b.isDestroyed()) {
@@ -332,42 +329,42 @@ public class Board extends JPanel implements Runnable, Commons {
     public void run() {
 
         long beforeTime, timeDiff, sleep;
-        String action = "MOVE 0 0";
-        
-        beforeTime = System.currentTimeMillis();
-        if (nplayers > 1) {
-            output.println(action);
-        }
-        while (ingame1 || ingame2) {
+        String action = "BEGIN";
+        try {
+            beforeTime = System.currentTimeMillis();
             if (nplayers > 1) {
-                try {
+                output.println(action);
+                System.out.println(input.readLine());
+            }
+            while (ingame1 || ingame2) {
+
+                if (nplayers > 1) {
+                    output.println(player1.getSocketmessage());
+                    output.flush();
                     action = input.readLine();
-                    if (action == "EXIT") {
+                    if (action.equals("EXIT")) {
                         break;
                     }
                     Player2command(action);
-                    output.println(player1.getSocketmessage());
-                    output.flush();
-                } catch (Exception ex) {
-                    System.out.println("Player 2 closed connection");
-                    break;
                 }
-            }
-            animationCycle();
-            repaint();
+                animationCycle();
+                repaint();
 
-            timeDiff = System.currentTimeMillis() - beforeTime;
-            sleep = DELAY - timeDiff;
+                timeDiff = System.currentTimeMillis() - beforeTime;
+                sleep = DELAY - timeDiff;
 
-            if (sleep < 0) {
-                sleep = 2;
+                if (sleep < 0) {
+                    sleep = 2;
+                }
+                try {
+                    Thread.sleep(sleep);
+                } catch (InterruptedException e) {
+                    System.out.println("interrupted");
+                }
+                beforeTime = System.currentTimeMillis();
             }
-            try {
-                Thread.sleep(sleep);
-            } catch (InterruptedException e) {
-                System.out.println("interrupted");
-            }
-            beforeTime = System.currentTimeMillis();
+        } catch (IOException ex) {
+            System.out.println("Player 2 closed connection");
         }
         if (nplayers > 1) {
             output.println("EXIT");
@@ -378,7 +375,7 @@ public class Board extends JPanel implements Runnable, Commons {
 
     private void Player2command(String action) {
         String[] mes = action.split(" ");
-        if (mes[0].equalsIgnoreCase("MOVE")){
+        if (mes[0].equalsIgnoreCase("MOVE")) {
             int direction = Integer.parseInt(mes[1]);
             int shoot = Integer.parseInt(mes[2]);
 
