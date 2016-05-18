@@ -12,10 +12,9 @@ public class GameServer {
         
         try (ServerSocket serversocket = new ServerSocket(PORT)){
             while (true) {
-                Player player1 = new Player(serversocket.accept());
-                Player player2 = new Player(serversocket.accept());
-                player1.run();
-                player2.run();
+                Game game = new Game(serversocket.accept(),serversocket.accept());
+                new Thread(game).start();
+                
             }
         } catch (IOException ex) {
             System.out.println("Exit");
