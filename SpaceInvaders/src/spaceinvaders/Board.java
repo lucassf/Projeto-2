@@ -50,7 +50,7 @@ public class Board extends JPanel implements Runnable, Commons {
     private final String alienpix = "/Recursos/alien.png";
     private String message = "Game Over";
 
-    private String HOST = "localhost";
+    private String HOST = "1ocalhost";
     private int PORT = 9090;
     private boolean worked;
 
@@ -302,7 +302,8 @@ public class Board extends JPanel implements Runnable, Commons {
 
         while (i3.hasNext()) {
             int shot = nplayers > 1 ? vars[j] : generator.nextInt(15);
-            j = (j+1)%vars.length;
+            if (nplayers>1)
+                j = (j+1)%vars.length;
             Alien a = (Alien) i3.next();
             Alien.Bomb b = a.getBomb();
             if (shot == CHANCE && a.isVisible() && b.isDestroyed()) {
