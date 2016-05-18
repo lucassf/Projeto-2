@@ -1,9 +1,5 @@
 package spaceinvaders;
 import Util.Commons;
-import static Util.Commons.BOMB_HEIGHT;
-import static Util.Commons.BOMB_WIDTH;
-import java.awt.Image;
-import static java.lang.System.*;
 import javax.swing.*;
 import javax.swing.ImageIcon;
 

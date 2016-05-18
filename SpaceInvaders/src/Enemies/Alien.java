@@ -1,5 +1,6 @@
 package Enemies;
 
+import Player.Player;
 import static Util.Commons.*;
 import javax.swing.ImageIcon;
 import Util.Sprite;
@@ -53,6 +54,29 @@ public class Alien extends Sprite {
 
         public boolean isDestroyed() {
             return destroyed;
+        }
+        
+        public void checkColision(Player player1,String expl){
+            int player1X = player1.getX();
+            int player1Y = player1.getY();
+            int bombX = getX();
+            int bombY = getY();
+            
+            if (player1.isVisible() && !isDestroyed()) {
+                if (bombX >= (player1X)
+                        && bombX <= (player1X + PLAYER_WIDTH)
+                        && bombY >= (player1Y)
+                        && bombY <= (player1Y + PLAYER_HEIGHT)) {
+                    ImageIcon ii
+                            = new ImageIcon(this.getClass().getResource(expl));
+                    Image image = ii.getImage();
+                    Image newimg = image.getScaledInstance(PLAYER_HEIGHT, PLAYER_WIDTH, java.awt.Image.SCALE_SMOOTH);
+                    ii = new ImageIcon(newimg);
+                    player1.setImage(ii.getImage());
+                    player1.setDying(true);
+                    setDestroyed(true);;
+                }
+            }
         }
     }
 }
