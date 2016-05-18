@@ -50,7 +50,7 @@ public class Board extends JPanel implements Runnable, Commons {
     private final String alienpix = "/Recursos/alien.png";
     private String message = "Game Over";
 
-    private String HOST = "localhost";
+    private String HOST = "1ocalhost";
     private int PORT = 9090;
     private boolean worked;
 
