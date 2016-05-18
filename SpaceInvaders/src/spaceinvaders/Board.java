@@ -65,16 +65,11 @@ public class Board extends JPanel implements Runnable, Commons {
         setFocusable(true);
         d = new Dimension(BOARD_WIDTH, BOARD_HEIGTH);
         setBackground(Color.black);
-        worked=true;
-        if (!gameInit()){
-            worked=false;
+        worked = true;
+        if (!gameInit()) {
+            worked = false;
         }
         setDoubleBuffered(true);
-    }
-
-    public void addNotify() {
-        super.addNotify();
-        gameInit();
     }
 
     public boolean gameInit() {
@@ -93,10 +88,10 @@ public class Board extends JPanel implements Runnable, Commons {
             }
         }
 
-        player1 = new Player("/Recursos/player.png",false);
+        player1 = new Player("/Recursos/player.png", false);
         player2 = null;
         if (nplayers == 2) {
-            player2 = new Player("/Recursos/player2.png",true);
+            player2 = new Player("/Recursos/player2.png", true);
             ingame2 = true;
             try {
                 socket = new Socket(HOST, PORT);
@@ -113,7 +108,7 @@ public class Board extends JPanel implements Runnable, Commons {
         }
         shot = new Shot();
         shot2 = new Shot();
-        
+
         if (animator == null || (!ingame1 && !ingame2)) {
             animator = new Thread(this);
             animator.start();
@@ -158,7 +153,8 @@ public class Board extends JPanel implements Runnable, Commons {
     public void drawShot(Graphics g) {
         if (shot.isVisible()) {
             g.drawImage(shot.getImage(), shot.getX(), shot.getY(), this);
-        } if (shot2.isVisible()){
+        }
+        if (shot2.isVisible()) {
             g.drawImage(shot2.getImage(), shot2.getX(), shot2.getY(), this);
         }
     }
@@ -240,8 +236,8 @@ public class Board extends JPanel implements Runnable, Commons {
         }
 
         // shot
-        deaths += shot.update(aliens,expl);
-        deaths+= shot2.update(aliens,expl);
+        deaths += shot.update(aliens, expl);
+        deaths += shot2.update(aliens, expl);
 
         // aliens
         Iterator it1 = aliens.iterator();
@@ -336,21 +332,29 @@ public class Board extends JPanel implements Runnable, Commons {
     public void run() {
 
         long beforeTime, timeDiff, sleep;
-
+        String action = "MOVE 0 0";
+        
         beforeTime = System.currentTimeMillis();
-
+        if (nplayers > 1) {
+            output.println(action);
+        }
         while (ingame1 || ingame2) {
-            repaint();
-            animationCycle();
             if (nplayers > 1) {
                 try {
-                    Player2command(input.readLine());
+                    action = input.readLine();
+                    if (action == "EXIT") {
+                        break;
+                    }
+                    Player2command(action);
                     output.println(player1.getSocketmessage());
-                } catch (IOException ex) {
-                    System.out.println("Player2 closed connection");
+                    output.flush();
+                } catch (Exception ex) {
+                    System.out.println("Player 2 closed connection");
                     break;
                 }
             }
+            animationCycle();
+            repaint();
 
             timeDiff = System.currentTimeMillis() - beforeTime;
             sleep = DELAY - timeDiff;
@@ -364,16 +368,19 @@ public class Board extends JPanel implements Runnable, Commons {
                 System.out.println("interrupted");
             }
             beforeTime = System.currentTimeMillis();
-
+        }
+        if (nplayers > 1) {
+            output.println("EXIT");
+            output.flush();
         }
         gameOver();
     }
 
     private void Player2command(String action) {
-        String[] message = action.split(" ");
-        if (message[0] == "MOVE") {
-            int direction = Integer.parseInt(message[1]);
-            int shoot = Integer.parseInt(message[2]);
+        String[] mes = action.split(" ");
+        if (mes[0].equalsIgnoreCase("MOVE")){
+            int direction = Integer.parseInt(mes[1]);
+            int shoot = Integer.parseInt(mes[2]);
 
             player2.setDirection(direction);
             player2.setShoot(shoot);
@@ -389,10 +396,11 @@ public class Board extends JPanel implements Runnable, Commons {
         public void keyReleased(KeyEvent e) {
             if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
                 player1.setRight(0);
-            }if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+            }
+            if (e.getKeyCode() == KeyEvent.VK_LEFT) {
                 player1.setLeft(0);
             }
-            if (e.getKeyCode()==KeyEvent.VK_S){
+            if (e.getKeyCode() == KeyEvent.VK_S) {
                 player1.setShoot(0);
             }
         }
